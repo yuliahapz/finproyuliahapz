@@ -22,7 +22,11 @@ const MyPost = ({ id }) => {
   const postsPerPage = 10;
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setError("No user ID provided.");
+      setLoading(false);
+      return;
+    }
 
     const fetchAllPosts = async () => {
       try {

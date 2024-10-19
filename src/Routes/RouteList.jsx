@@ -18,7 +18,6 @@ import PostById from "../Pages/Post/PostById";
 import Explore from "../Pages/Post/Explore";
 import Sidebar from "../Pages/Component/Sidebar";
 import Home from "../Home";
-import FollowUser from "../Pages/Follow/FollowUser";
 import MyFollowingStories from "../Pages/Story/MyFollowingStories";
 import PostByUser from "../Pages/Post/PostByUser";
 import DeletePost from "../Pages/Post/DeletePost";
@@ -164,14 +163,6 @@ export const routeList = [
     element: (
       <ProtectedRoute>
         <Home />
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: "/followuser",
-    element: (
-      <ProtectedRoute>
-        <FollowUser />
       </ProtectedRoute>
     )
   },
