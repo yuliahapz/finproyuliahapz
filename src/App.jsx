@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useLocation, useRoutes } from 'react-router-dom';
+import { routeList } from './Routes/RouteList'; // Import routeList
+import Sidebar from './Pages/Component/Sidebar';
+import "./index.css";
+import { toast } from 'react-hot-toast';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const element = useRoutes(routeList); // Generate routes from routeList
+  const location = useLocation();
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+  const isProtectedRoute = !["/login", "/register"].includes(location.pathname); // Check if location.pathname is not "/login" or "/register"
 
-export default App
+  // Check if user is authenticated for sidebar
+  const isAuthenticated = localStorage.getItem('token');
+
+  if (!isAuthenticated && isProtectedRoute) {
+    toast.error("You must be logged in!");
+    return null; // Do not render Sidebar or the main content if not authenticated
+  }
+
+  // Conditional rendering of layout
+  const renderLayout = () => {
+    if (isProtectedRoute && isAuthenticated) {
+      return (
+        <div style={{ display: 'flex' }}>
+          <Sidebar />
+          <div style={{ marginLeft: 200, flex: 1 }}> {/* Adjust content margin for protected routes */}
+            {element} {/* Render routed components */}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex justify-center items-center h-screen">
+          {element} {/* Center login/register forms */}
+        </div>
+      );
+    }
+  };
+
+  return renderLayout();
+};
+
+export default App;
