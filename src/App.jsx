@@ -4,21 +4,18 @@ import Sidebar from './Pages/Component/Sidebar';
 import "./index.css";
 import { toast } from 'react-hot-toast';
 
-const App = () => {
-  const element = useRoutes(routeList); // Generate routes from routeList
+const App = () => { 
+  const element = useRoutes(routeList); 
   const location = useLocation();
 
-  const isProtectedRoute = !["/login", "/register"].includes(location.pathname); // Check if location.pathname is not "/login" or "/register"
+  const isProtectedRoute = !["/login", "/register"].includes(location.pathname); 
 
-  // Check if user is authenticated for sidebar
   const isAuthenticated = localStorage.getItem('token');
 
   if (!isAuthenticated && isProtectedRoute) {
     toast.error("You must be logged in!");
-    return null; // Do not render Sidebar or the main content if not authenticated
-  }
-
-  // Conditional rendering of layout
+    return null; 
+  } 
   const renderLayout = () => {
     if (isProtectedRoute && isAuthenticated) {
       return (
