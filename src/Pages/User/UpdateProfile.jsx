@@ -68,9 +68,15 @@ const UpdateProfile = () => {
       formData.append("profilePicture", profilePictureUrl); // Mengirim file gambar yang di-upload
     }
     formData.append("phoneNumber", phoneNumber);
-    formData.append("bio", bio);
-    formData.append("website", website);
+     // Only append bio if it's filled
+     if (bio.trim() !== "") {
+      formData.append("bio", bio);
+  }
 
+      // Only append website if it's filled
+      if (website.trim() !== "") {
+      formData.append("website", website);
+  }
     axios
       .post(
         "https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/update-profile",
@@ -89,10 +95,25 @@ const UpdateProfile = () => {
         localStorage.setItem("currentEmail", email); // Update email di localStorage jika diubah
         navigate("/profile");
       })
-      .catch((error) => {
-        toast.error("Failed to update profile.");
-        console.log(error);
-      });
+        .catch((error) => {
+          if (error.response) {
+            console.log("Error response received:", error.response);
+            if (error.response.status === 404) {
+              const message = error.response.data.message;
+              if (message === "Email already taken") {
+                toast.error("The email you entered is already in use. Please use a different email.");
+                alert("The email you entered is already in use. Please use a different email."); // Fallback alert
+              }
+            } else {
+              toast.error("Failed to update profile. Please try again later.");
+              alert("Failed to update profile. Please try again later."); // Fallback alert
+            }
+          } else {
+            toast.error("An error occurred. Please check your network and try again.");
+            alert("An error occurred. Please check your network and try again."); // Fallback alert
+          }
+          console.log(error); // Log the error for debugging purposes
+        });      
   };
 
   return (
