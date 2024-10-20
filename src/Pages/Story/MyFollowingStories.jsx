@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import StoryById from "./StoryById"; // Import StoryById component
+import StoryById from "./StoryById";
 
 const MyFollowingStories = () => {
     const [stories, setStories] = useState([]);
@@ -79,7 +79,7 @@ const MyFollowingStories = () => {
         // Set a timer to close the story modal after 5 seconds
         setTimeout(() => {
             handleCloseModal();
-        }, 5000); // 5 seconds
+        }, 10000); // 5 seconds
     };
 
     const handleCloseModal = () => {

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams} from 'react-router-dom';
-import { HeartIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 const PostById = () => {
   const [post, setPost] = useState(null);
@@ -71,8 +70,6 @@ const PostById = () => {
           <div className="px-6 py-4 mb-2">
             <h5 className="font-bold text-gray-800">Uploaded by: {post.user ? post.user.username : 'Rafael'}</h5>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">{post.caption }</h2>
-            <p className="text-gray-600 mb-2"><HeartIcon className="h-5 w-5 mb-1 inline-block mr-1" />  {post.totalLikes || 0 }</p>
-            <p className="text-gray-600">Comments: {post.totalComments || 0}</p>
             <p className="text-gray-500 text-sm">Created At: {new Date(post.createdAt).toLocaleString()}</p>
             <p className="text-gray-500 text-sm">Updated At: {new Date(post.updatedAt).toLocaleString()}</p>
           </div>

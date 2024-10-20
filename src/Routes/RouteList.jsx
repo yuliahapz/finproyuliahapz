@@ -24,6 +24,7 @@ import DeletePost from "../Pages/Post/DeletePost";
 import MyPost from "../Pages/Post/MyPost";
 import SearchNavbar from "../Pages/Component/SearchNavbar";
 import MyFollowingPost from "../Pages/Post/MyFollowingPost";
+import DeleteStory from "../Pages/Story/DeleteStory";
 
 export const routeList = [
   {
@@ -215,6 +216,14 @@ export const routeList = [
     element: (
       <ProtectedRoute>
         <MyFollowingPost />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/DeleteStory/:storyId",
+    element: (
+      <ProtectedRoute>
+        <DeleteStory />
       </ProtectedRoute>
     )
   }

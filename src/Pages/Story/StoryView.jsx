@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 
-
 const StoryView = ({ storyId }) => {
-    const [story, setStory] = useState(null);
+    const [stories, setStories] = useState([]); // Update to handle array of stories
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchStory = async () => {
+        const fetchStories = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error("No token found. Please log in again.");
@@ -25,16 +24,17 @@ const StoryView = ({ storyId }) => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setStory(response.data.data.story); // Assuming `story` is in the response structure
+                console.log(response.data); // Log to inspect the structure
+                setStories(response.data.data); // Set stories array
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching story:", error);
-                setError("Failed to fetch story.");
+                console.error("Error fetching stories:", error);
+                setError("Failed to fetch stories.");
                 setLoading(false);
             }
         };
 
-        fetchStory();
+        fetchStories();
     }, [storyId]);
 
     if (loading) {
@@ -46,23 +46,30 @@ const StoryView = ({ storyId }) => {
     }
 
     return (
-        <div>
-            <h1>Story View</h1>
-            {story ? (
-                <div>
-                    <h2>{story.title}</h2>
-                    <p>{story.description}</p>
-                    <img src={story.image} alt={story.title} />
+        <div className="p-4">
+            {stories.length > 0 ? (
+                <div className="max-h-96 overflow-y-auto rounded-lg p-2 bg-white">
+                    {stories.map((story) => (
+                        <div key={story.id} className="flex items-center p-2">
+                            <img 
+                                src={story.user?.profilePictureUrl || 'https://via.placeholder.com/400'} 
+                                alt={story.user?.username} 
+                                className="w-12 h-12 rounded-full mr-3"
+                                onError={(e) => { e.target.src = 'https://via.placeholder.com/400'; }} // Fallback image
+                            />
+                            <p className="text-lg font-semibold text-gray-800">{story.user?.username}</p>
+                        </div>
+                    ))}
                 </div>
             ) : (
-                <p>No story found.</p>
+                <p className="text-gray-600">No stories found.</p>
             )}
         </div>
     );
 };
 
-export default StoryView;
-
 StoryView.propTypes = {
   storyId: PropTypes.string.isRequired,
 };
+
+export default StoryView;

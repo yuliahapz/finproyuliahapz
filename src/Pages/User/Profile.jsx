@@ -101,7 +101,7 @@ const Profile = () => {
         {/* Profile Image and Edit Button */}
         <div className="flex flex-col justify-center items-center mb-4 relative">
           {/* Story ring */}
-          <div className="relative w-52 h-52 rounded-full border-4 border-pink-500 flex items-center justify-center">
+          <div className="relative w-52 h-52 rounded-full border-4 border-white flex items-center justify-center">
           <Image
   src={
     profilePictureUrl
