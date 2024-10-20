@@ -102,21 +102,23 @@ const Profile = () => {
         <div className="flex flex-col justify-center items-center mb-4 relative">
           {/* Story ring */}
           <div className="relative w-52 h-52 rounded-full border-4 border-pink-500 flex items-center justify-center">
-            <Image
-              src={
-                profilePictureUrl ||
-                'https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg'
-              }
-              alt={username}
-              className="rounded-full object-cover"
-              width={200}
-              height={200}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  'https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg';
-              }}
-            />
+          <Image
+  src={
+    profilePictureUrl
+      ? `${profilePictureUrl}?timestamp=${new Date().getTime()}`
+      : "https://i.pinimg.com/736x/4c/7e/a6/4c7ea6b3320713b22634c68b2ee89862.jpg"
+      }
+      alt={username}
+      className="rounded-full object-cover"
+      width={200}
+      height={200}
+      onError={(e) => {
+          e.target.onerror = null;
+          e.target.src =
+          "https://i.pinimg.com/736x/4c/7e/a6/4c7ea6b3320713b22634c68b2ee89862.jpg";
+          }}
+          />
+
           </div>
           {/* Edit Profile Button */}
           <button

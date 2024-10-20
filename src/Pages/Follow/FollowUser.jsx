@@ -2,8 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types"; 
 import axios from "axios";
 import { toast } from 'react-hot-toast';
-import FollowButton from "./FollowButton";
-import unfollowUser from "./unfollowUser";
+import unfollowUser from "./unfollowUser"; // Ensure unfollowUser function is in the same folder
 
 export const FollowUser = ({ userId, isFollowing, onFollowChange }) => {
     const [loading, setLoading] = useState(false);
@@ -53,11 +52,13 @@ export const FollowUser = ({ userId, isFollowing, onFollowChange }) => {
     };
 
     return (
-        <FollowButton
-            loading={loading}
-            isFollowing={isFollowing}
+        <button
+            className={`py-1 px-4 rounded-lg ${isFollowing ? "bg-red-500 text-white" : "bg-blue-500 text-white"} ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             onClick={handleFollowToggle}
-        />
+            disabled={loading}
+        >
+            {loading ? "Processing..." : isFollowing ? "Unfollow" : "Follow"}
+        </button>
     );
 };
 

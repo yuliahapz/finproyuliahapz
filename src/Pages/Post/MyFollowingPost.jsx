@@ -6,6 +6,7 @@ import { HeartIcon as HeartIconOutline, ChatBubbleLeftIcon } from '@heroicons/re
 import CreateComment from "../Comment/CreateComment";
 import { Link } from 'react-router-dom';
 import DeleteComment from "../Comment/DeleteComment";
+import Pagination from '../Component/Pagination';
 
 const MyFollowingPost = () => {
     const [posts, setPosts] = useState([]);
@@ -164,33 +165,13 @@ const MyFollowingPost = () => {
                     ))}
                 </div>
             )}
-            <div className="flex justify-center mt-4">
-                <button
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                    className="bg-blue-500 text-white rounded px-4 py-2 mr-2"
-                >
-                    Previous
-                </button>
-                <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="bg-blue-500 text-white rounded px-4 py-2"
-                >
-                    Next
-                </button>
-            </div>
-            {/* Pagination Number Display */}
-            <div className="flex justify-center mt-4">
-                {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                        key={index + 1}
-                        onClick={() => setCurrentPage(index + 1)}
-                        className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
+             <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-4">
+                <Pagination 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPrevious={handlePreviousPage} 
+                    onNext={handleNextPage} 
+                />
             </div>
         </div>
     );

@@ -7,11 +7,11 @@ const UpdateProfile = () => {
   const [name, setName] = useState("");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
-  const [profilePictureUrl, setProfilePictureUrl] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null); // Ubah ke null awalnya
   const [phoneNumber, setPhoneNumber] = useState("");
   const [bio, setBio] = useState("");
   const [website, setWebsite] = useState("");
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(""); // Untuk menampilkan preview gambar
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,12 +33,11 @@ const UpdateProfile = () => {
         setName(name);
         setUserName(username);
         setEmail(email);
-        setProfilePictureUrl(profilePictureUrl);
         setPhoneNumber(phoneNumber);
         setBio(bio);
         setWebsite(website);
-        setPreviewUrl(profilePictureUrl); // Set initial profile picture preview
-        localStorage.setItem("currentEmail", email); // Store current email in localStorage
+        setPreviewUrl(profilePictureUrl); // Set preview awal dari gambar profil
+        localStorage.setItem("currentEmail", email); // Menyimpan email di localStorage
       })
       .catch((error) => {
         console.log(error);
@@ -50,26 +49,28 @@ const UpdateProfile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result); // Show preview of the uploaded image
+        setPreviewUrl(reader.result); // Menampilkan preview dari gambar yang di-upload
       };
       reader.readAsDataURL(file);
-      setProfilePictureUrl(file); // Store the file for uploading
+      setProfilePictureUrl(file); // Menyimpan file untuk di-upload
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-  
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("username", userName);
     formData.append("email", email);
-    formData.append("profilePicture", profilePictureUrl); // Send the file
+    if (profilePictureUrl) { // Pastikan file gambar dipilih
+      formData.append("profilePicture", profilePictureUrl); // Mengirim file gambar yang di-upload
+    }
     formData.append("phoneNumber", phoneNumber);
     formData.append("bio", bio);
     formData.append("website", website);
-  
+
     axios
       .post(
         "https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/update-profile",
@@ -78,26 +79,26 @@ const UpdateProfile = () => {
           headers: {
             apiKey: "c7b411cc-0e7c-4ad1-aa3f-822b00e7734b",
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data", // Important for file upload
+            "Content-Type": "multipart/form-data", // Penting untuk mengirim file
           },
         }
       )
       .then((response) => {
-        console.log(response.data.data)
+        console.log(response.data.data);
         toast.success("Profile updated successfully!");
-        localStorage.setItem("currentEmail", email); // Update email in localStorage if changed
+        localStorage.setItem("currentEmail", email); // Update email di localStorage jika diubah
         navigate("/profile");
       })
       .catch((error) => {
-        toast.error("Failed to update profile.",error);
+        toast.error("Failed to update profile.");
+        console.log(error);
       });
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
-      <button onClick={() => navigate(-1)} className="bg-white-500 text-xs rounded">Back</button>
+        <button onClick={() => navigate(-1)} className="bg-white-500 text-xs rounded">Back</button>
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Profile</h1>
 
         {/* Display the current profile picture */}
@@ -113,14 +114,19 @@ const UpdateProfile = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-          <input
-            type="file"
-            id="profilePictureInput"
-            className="hidden" // Hide the file input
-            onChange={handleFileChange}
-            accept="image/*"
-          />
+          {/* File Input for Profile Picture */}
+          <div className="mb-4">
+            <label className="block text-gray-600 text-sm font-medium mb-2">Profile Picture</label>
+            <input
+              type="file"
+              id="profilePictureInput"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleFileChange}
+              accept="image/*"
+            />
+          </div>
 
+          {/* Input Name */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Name</label>
             <input
@@ -132,6 +138,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Input Username */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Username</label>
             <input
@@ -143,6 +150,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Input Email */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Email</label>
             <input
@@ -154,6 +162,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Input Phone Number */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Phone Number</label>
             <input
@@ -165,6 +174,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Input Bio */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Bio</label>
             <textarea
@@ -176,6 +186,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Input Website */}
           <div className="mb-4">
             <label className="block text-gray-600 text-sm font-medium mb-2">Website</label>
             <input
@@ -187,6 +198,7 @@ const UpdateProfile = () => {
             />
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors"

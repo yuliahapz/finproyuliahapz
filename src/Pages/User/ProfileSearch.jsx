@@ -19,7 +19,6 @@ const ProfileSearch = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // Fetch user data from API
     useEffect(() => {
         const fetchUser = async () => {
             setIsLoading(true);
@@ -31,7 +30,15 @@ const ProfileSearch = () => {
                     },
                 });
                 setUser(response.data.data);
-                setIsFollowing(response.data.data.isFollowing);
+
+                // Check local storage for follow status
+                const storedFollowingStatus = localStorage.getItem(`isFollowing_${id}`);
+                if (storedFollowingStatus !== null) {
+                    setIsFollowing(storedFollowingStatus === 'true');
+                } else {
+                    setIsFollowing(response.data.data.isFollowing);
+                }
+
                 setTotalFollowers(response.data.data.totalFollowers);
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -44,9 +51,12 @@ const ProfileSearch = () => {
         fetchUser();
     }, [id]);
 
-    const handleFollowChange = (isFollowing) => {
-        setIsFollowing(isFollowing);
-        setTotalFollowers((prevTotal) => isFollowing ? prevTotal + 1 : prevTotal - 1);
+    const handleFollowChange = (newFollowStatus) => {
+        setIsFollowing(newFollowStatus);
+        setTotalFollowers((prevTotal) => newFollowStatus ? prevTotal + 1 : prevTotal - 1);
+
+        // Save follow status to localStorage
+        localStorage.setItem(`isFollowing_${id}`, newFollowStatus);
     };
 
     const getFollowing = async () => {
@@ -211,7 +221,8 @@ const ProfileSearch = () => {
                                 followingUser.username.toLowerCase().includes(searchTerm.toLowerCase())
                             )
                             .map((followingUser) => (
-                                <li key={followingUser.id} className="flex items-center space-x-4 mt-4">
+                                <li key={followingUser.id} className="flex items-center space-x-4 mt-4 cursor-pointer"
+                                onClick={() => navigate(`/profile/${followingUser.id}`)}>
                                     <img
                                         src={followingUser.profilePictureUrl || "https://i.pinimg.com/736x/4c/7e/a6/4c7ea6b3320713b22634c68b2ee89862.jpg"}
                                         alt={followingUser.username}
@@ -246,7 +257,8 @@ const ProfileSearch = () => {
                 <ul className="max-h-64 overflow-y-auto mt-4">
                     {followersList.length > 0 ? (
                         followersList.map((followerUser) => (
-                            <li key={followerUser.id} className="flex items-center space-x-4 mt-4">
+                            <li key={followerUser.id} className="flex items-center space-x-4 mt-4 cursor-pointer"
+                            onClick={() => navigate(`/profile/${followerUser.id}`)}>
                                 <img
                                     src={followerUser.profilePictureUrl || "https://i.pinimg.com/736x/4c/7e/a6/4c7ea6b3320713b22634c68b2ee89862.jpg"}
                                     alt={followerUser.username}

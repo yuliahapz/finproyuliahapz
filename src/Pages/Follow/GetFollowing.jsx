@@ -40,6 +40,11 @@ const GetFollowing = () => {
     navigate(-1); // Navigate to the previous page
   };
 
+    // Fungsi untuk navigasi ke halaman profil berdasarkan userId
+    const goToProfile = (userId) => {
+      navigate(`/profile/${userId}`); // Arahkan ke halaman profil dengan userId
+    };
+
   return (
     <div className="mt-4 px-4">
       {/* Back Button */}
@@ -69,7 +74,8 @@ const GetFollowing = () => {
               user.username.toLowerCase().includes(searchTerm.toLowerCase())
             ) // Filter based on search term
             .map((user) => (
-              <li key={user.id} className="flex items-center space-x-4 mt-4 justify-center">
+              <li key={user.id} className="flex items-center space-x-4 mt-4 justify-center cursor-pointer"
+              onClick={() => goToProfile(user.id)}>
                 <img
                   src={user.profilePictureUrl || "https://i.pinimg.com/736x/4c/7e/a6/4c7ea6b3320713b22634c68b2ee89862.jpg"}
                   alt={user.username}
