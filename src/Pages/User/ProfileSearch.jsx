@@ -49,6 +49,10 @@ const ProfileSearch = () => {
         };
 
         fetchUser();
+
+        // Reset modal visibility when profile ID changes
+        setFollowingModalVisible(false);
+        setFollowersModalVisible(false);
     }, [id]);
 
     const handleFollowChange = (newFollowStatus) => {
@@ -254,6 +258,16 @@ const ProfileSearch = () => {
                 centered
                 bodyStyle={{ maxHeight: '80vh', overflowY: 'auto' }} // Limit height and make scrollable
             >
+                <div className="mt-4">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        placeholder="Search followers..."
+                        className="border rounded-lg p-2 w-full"
+                    />
+                </div>
+        
                 <ul className="max-h-64 overflow-y-auto mt-4">
                     {followersList.length > 0 ? (
                         followersList.map((followerUser) => (
