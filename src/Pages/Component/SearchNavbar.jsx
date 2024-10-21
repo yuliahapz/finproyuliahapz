@@ -3,8 +3,6 @@ import axios from "axios";
 import { Input, Modal, Button, Spin } from 'antd';
 import { toast, Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-
-
 const { Search } = Input;
 
 const SearchNavbar = () => {
@@ -24,9 +22,8 @@ const SearchNavbar = () => {
             toast.error("Token is missing. Please log in again.");
             return;
         }
-
         setIsLoading(true);
-
+        
         try {
             const response = await axios.get(`https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/user/${value}`, {
                 headers: {

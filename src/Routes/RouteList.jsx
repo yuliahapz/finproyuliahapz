@@ -25,6 +25,7 @@ import MyPost from "../Pages/Post/MyPost";
 import SearchNavbar from "../Pages/Component/SearchNavbar";
 import MyFollowingPost from "../Pages/Post/MyFollowingPost";
 import DeleteStory from "../Pages/Story/DeleteStory";
+import SearchPost from "../Pages/Post/SearchPost";
 
 export const routeList = [
   {
@@ -224,6 +225,14 @@ export const routeList = [
     element: (
       <ProtectedRoute>
         <DeleteStory />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: "/SearchPost",
+    element: (
+      <ProtectedRoute>
+        <SearchPost />
       </ProtectedRoute>
     )
   }

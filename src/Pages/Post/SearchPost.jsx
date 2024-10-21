@@ -8,7 +8,7 @@ import { toggleLike } from '../Like/LikePost';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
 
-const Explore = () => {
+const SearchPost = () => {
     const [posts, setPosts] = useState([]);
     const [comments, setComments] = useState({});
     const [newComments, setNewComments] = useState({});
@@ -137,7 +137,6 @@ const Explore = () => {
                     (comment) => comment.id !== commentId
                 ),
             }));
-            toast.success("Comment deleted successfully");
         } catch (error) {
             console.error("Error deleting comment:", error);
         }
@@ -226,11 +225,11 @@ const Explore = () => {
                             Comment
                         </button>
                         <button
-                                onClick={() => toggleComments(post.id)}
-                                className="text-sm text-blue-600 hover:underline"
-                            >
-                                {commentsRequested[post.id] ? "Hide Comments" : "Show Comments"}
-                            </button>
+                                    onClick={() => toggleComments(post.id)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
+                                    {commentsRequested[post.id] ? "Hide Comments" : "Show Comments"}
+                                </button>
                     </div>
                     
                     <div className="mt-4 space-y-2">
@@ -274,4 +273,4 @@ const Explore = () => {
     );
 };
 
-export default Explore;
+export default SearchPost;

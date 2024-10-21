@@ -2,6 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Modal } from "antd";
+import PropTypes from 'prop-types';
 
 const DeleteStory = ({ isModalOpen, setIsModalOpen, storyId }) => {
     const navigate = useNavigate();
@@ -56,6 +57,12 @@ const DeleteStory = ({ isModalOpen, setIsModalOpen, storyId }) => {
     // Function to handle modal cancellation
     const handleCancel = () => {
         setIsModalOpen(false); // Close modal
+    };
+    
+    DeleteStory.propTypes = {
+      isModalOpen: PropTypes.bool.isRequired,
+      setIsModalOpen: PropTypes.func.isRequired,
+      storyId: PropTypes.string.isRequired,
     };
 
     return (

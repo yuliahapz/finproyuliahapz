@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toggleLike } from '../Like/LikePost';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { HeartIcon as HeartIconOutline, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
-import CreateComment from "../Comment/CreateComment";
+import { HeartIcon as HeartIconOutline, TrashIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import DeleteComment from "../Comment/DeleteComment";
 import Pagination from '../Component/Pagination';
+import toast from "react-hot-toast";
 
 const MyFollowingPost = () => {
     const [posts, setPosts] = useState([]);
@@ -15,14 +14,18 @@ const MyFollowingPost = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [comments, setComments] = useState({});
-    const [visibleComments, setVisibleComments] = useState({});
+    const [newComments, setNewComments] = useState({});
+    const [commentsRequested, setCommentsRequested] = useState({});
     const userId = localStorage.getItem('userId');
+    const postsPerPage = 10;
 
+    // Fetch posts from API
     useEffect(() => {
         const fetchPosts = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/following-post?size=10&page=${currentPage}`, {
+                const response = await axios.get(`https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/following-post?size=${postsPerPage}&page=${currentPage}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
@@ -31,11 +34,9 @@ const MyFollowingPost = () => {
                 });
 
                 const fetchedPosts = response.data.data.posts;
-
                 if (Array.isArray(fetchedPosts)) {
-                    // Sort posts by updatedAt in descending order
                     const sortedPosts = fetchedPosts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-                    setPosts(sortedPosts);
+                    setPosts((prevPosts) => [...prevPosts, ...sortedPosts]);
                     setTotalPages(response.data.data.totalPages);
                 } else {
                     throw new Error('No posts found or data is not an array');
@@ -50,38 +51,132 @@ const MyFollowingPost = () => {
         fetchPosts();
     }, [currentPage]);
 
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
+    // Handle scrolling to load more posts
+    useEffect(() => {
+        const handleScroll = () => {
+            if (
+                window.innerHeight + document.documentElement.scrollTop
+                !== document.documentElement.offsetHeight
+                || loading
+            ) return;
+            if (currentPage < totalPages) {
+                setCurrentPage((prevPage) => prevPage + 1);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [currentPage, totalPages, loading]);
+
+    const fetchComments = async (postId) => {
+        try {
+            if (commentsRequested[postId]) {
+                // If comments were already requested, just toggle the display
+                setCommentsRequested((prevRequested) => ({
+                    ...prevRequested,
+                    [postId]: !prevRequested[postId], // Toggle requested state
+                }));
+                return; // Exit early to prevent fetching comments again
+            }
+            const response = await axios.get(
+                `https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/post/${postId}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        apiKey: "c7b411cc-0e7c-4ad1-aa3f-822b00e7734b",
+                    },
+                }
+            );
+            const commentsData = response.data.data.comments || [];
+            setComments((prevComments) => ({
+                ...prevComments,
+                [postId]: commentsData,
+            }));
+            setCommentsRequested((prevRequested) => ({
+                ...prevRequested,
+                [postId]: true, // Mark comments as requested for this post
+            }));
+        } catch (error) {
+            console.error("Error fetching comments:", error);
         }
     };
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
+    // Create a new comment
+    const createComment = async (postId) => {
+        try {
+            const token = localStorage.getItem("token");
+            const newComment = newComments[postId] || "";
+            if (!newComment) {
+                return alert("Please write a comment before submitting.");
+            }
+
+            const response = await axios.post(
+                `https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/create-comment`,
+                {
+                    postId,
+                    comment: newComment,
+                },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                        apiKey: "c7b411cc-0e7c-4ad1-aa3f-822b00e7734b",
+                    },
+                }
+            );
+            if (response.status === 200) {
+                toast.success("Comment created successfully");
+            } else {
+                console.error("Error creating comment:", response.data);
+            }
+            fetchComments(postId);
+            setNewComments((prevNewComments) => ({
+                ...prevNewComments,
+                [postId]: "",
+            }));
+        } catch (error) {
+            console.error("Error creating comment:", error);
         }
     };
 
-    const handleToggleComments = useCallback((postId) => {
-        setVisibleComments((prevVisible) => ({
-            ...prevVisible,
-            [postId]: !prevVisible[postId],
-        }));
-    }, []);
+    // Delete a comment
+    const deleteComment = async (postId, commentId) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.delete(
+                `https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/delete-comment/${commentId}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                        apiKey: "c7b411cc-0e7c-4ad1-aa3f-822b00e7734b",
+                    },
+                }
+            );
+            setComments((prevComments) => ({
+                ...prevComments,
+                [postId]: prevComments[postId].filter((comment) => comment.id !== commentId),
+            }));
+            toast.success("Comment deleted successfully");
+        } catch (error) {
+            console.error("Error deleting comment:", error);
+        }
+    };
 
-    const handleCommentAdded = useCallback((postId, updatedComments) => {
-        setComments((prevComments) => ({
-            ...prevComments,
-            [postId]: updatedComments,
+    const handleCommentChange = (postId, comment) => {
+        setNewComments((prevNewComments) => ({
+            ...prevNewComments,
+            [postId]: comment,
         }));
-    }, []);
+    };
 
-    const handleDeleteComment = useCallback((postId, commentId) => {
-        setComments((prevComments) => ({
-            ...prevComments,
-            [postId]: prevComments[postId].filter(comment => comment.id !== commentId),
-        }));
-    }, []);
+    const toggleComments = (postId) => {
+        setCommentsRequested(prev => ({ ...prev, [postId]: !prev[postId] }));
+        if (!commentsRequested[postId]) {
+            fetchComments(postId);
+        }
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -94,12 +189,12 @@ const MyFollowingPost = () => {
                             <div className="flex items-center mb-4">
                                 <Link to={`/profile/${post.user?.id}`}>
                                     <img
-                                        src={post.user?.profilePicture || 'https://akcdn.detik.net.id/community/media/visual/2024/09/27/jiraiya-dalam-naruto.webp?w=700&q=90'}
-                                        alt={post.user?.username || 'User'}
-                                        className="w-8 h-8 rounded-full mr-2"
+                                        src={post.user?.profilePictureUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcX9fmFcz6aeB7fkS13C5Rb4C8Yca7x0HNx9lc_8DsHsJp8BM3iWNnEhU70b3BHe4_OCM&usqp=CAU"}
+                                        alt={post.user?.username}
+                                        className="w-8 h-8 mr-4 rounded-full object-cover"
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = 'https://akcdn.detik.net.id/community/media/visual/2024/09/27/jiraiya-dalam-naruto.webp?w=700&q=90';
+                                            e.target.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcX9fmFcz6aeB7fkS13C5Rb4C8Yca7x0HNx9lc_8DsHsJp8BM3iWNnEhU70b3BHe4_OCM&usqp=CAU";
                                         }}
                                     />
                                 </Link>
@@ -107,74 +202,85 @@ const MyFollowingPost = () => {
                                     <h2 className="text-lg font-bold">{post.user?.username}</h2>
                                 </Link>
                             </div>
+    
                             <Link to={`/post/${post.id}`}>
-                                <div>
-                                    <img
-                                        src={post.imageUrl || 'https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/default-image.jpg'}
-                                        alt={post.caption || 'Post image'}
-                                        className="w-full h-72 object-cover mt-4 rounded-lg"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg';
-                                        }}
-                                    />
-                                </div>
+                                <img
+                                    src={post.imageUrl || "https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg"}
+                                    alt={post.title}
+                                    className="w-full h-64 object-cover rounded-md mb-4"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg";
+                                    }}
+                                />
                             </Link>
-                            <div className="flex items-center ml-4 mt-4 mb-4">
+    
+                            <div className="flex items-center mb-4">
                                 <button onClick={() => toggleLike(post.id, post.isLike, setPosts)}>
                                     {post.isLike ? (
-                                        <HeartIconSolid className="h-6 w-6 text-red-500" />
+                                        <HeartIconSolid className="h-6 w-6 text-red-500 hover:text-red-600" />
                                     ) : (
-                                        <HeartIconOutline className="h-6 w-6 text-gray-400" />
+                                        <HeartIconOutline className="h-6 w-6 text-gray-600 hover:text-gray-500" />
                                     )}
+                                </button>
+                                <span className="text-sm text-gray-900 ml-2">{post.totalLikes || 0} likes</span>
+                                <h2 className="ml-auto mr-2">{post.caption}</h2>
+                            </div>
+    
+                            <input
+                                type="text"
+                                value={newComments[post.id] || ""}
+                                onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                                placeholder="Write a comment..."
+                                className="w-full p-2 border rounded-md mb-2"
+                            />
+                            <div className="flex justify-between">
+                                <button
+                                    onClick={() => createComment(post.id)}
+                                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 text-sm"
+                                >
+                                    Comment
                                 </button>
                                 <button
-                                    className="ml-2"
-                                    onClick={() => handleToggleComments(post.id)}
+                                    onClick={() => toggleComments(post.id)}
+                                    className="text-sm text-blue-600 hover:underline"
                                 >
-                                    <ChatBubbleLeftIcon className="h-6 w-6 text-gray-400" />
+                                    {commentsRequested[post.id] ? "Hide Comments" : "Show Comments"}
                                 </button>
-                                <span className="text-sm text-gray-600 ml-2">{post.totalLikes || 0} likes</span>
                             </div>
-                            <p className="text-gray-900 text-gray-900 mt-2">{post.caption}</p>
-                            {visibleComments[post.id] && (
+    
+                            {commentsRequested[post.id] && (
                                 <div className="mt-2">
-                                    <pre className="mb-2">comments:</pre>
-                                    {comments[post.id] && Array.isArray(comments[post.id]) && comments[post.id].length > 0 ? (
-                                        comments[post.id].map((comment) => (
-                                            <div key={comment.id} className="mb-1 flex items-center">
-                                                <span className="font-bold mr-2">{comment.user.username} :</span> {comment.comment}
-                                                {comment.user.id === userId && (
-                                                    <div className='ml-auto'>
-                                                        <DeleteComment 
-                                                            postId={post.id} 
-                                                            commentId={comment.id} 
-                                                            onDeleteComment={handleDeleteComment}
-                                                        />
-                                                    </div>
-                                                )}
+                                    {comments[post.id]?.map((comment) => (
+                                        <div key={comment.id} className="flex justify-between items-center mb-1 text-sm">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-bold">{comment.user?.username || "Unknown User"}:</span>
+                                                <span>{comment.comment}</span>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <p>No comments yet</p>
-                                    )}
-                                    <CreateComment postId={post.id} onAddComment={(newComment) => handleCommentAdded(post.id, newComment)} />
+                                            {userId === comment.userId && (
+                                                <TrashIcon
+                                                    className="h-4 w-4 text-red-500 cursor-pointer"
+                                                    onClick={() => deleteComment(post.id, comment.id)}
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
                     ))}
                 </div>
             )}
-             <div className="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-center mt-4">
-                <Pagination 
-                    currentPage={currentPage} 
-                    totalPages={totalPages} 
-                    onPrevious={handlePreviousPage} 
-                    onNext={handleNextPage} 
+            {/* Pagination Component */}
+            {totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
                 />
-            </div>
+            )}
         </div>
-    );
-};
+    );    
+};    
 
 export default MyFollowingPost;
