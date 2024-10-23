@@ -1,26 +1,27 @@
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { TrashIcon, PencilSquareIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline"; 
-import { Image } from "antd";
-import { toggleLike } from '../Like/LikePost';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartIconOutline } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import Pagination from '../Component/Pagination';
 import PropTypes from 'prop-types';
-
+import { Image } from "antd";
+import { toggleLike } from '../Like/LikePost';
+import { TrashIcon, PencilSquareIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline"; 
+import { useNavigate } from "react-router-dom";
 
 const MyPost = ({ id }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [comments, setComments] = useState({});
+  const [commentsRequested, setCommentsRequested] = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
+  const navigate = useNavigate();
   const postsPerPage = 10;
-
+  
   useEffect(() => {
     if (!id) {
       setError("No user ID provided.");
@@ -68,6 +69,58 @@ const MyPost = ({ id }) => {
     setDropdownOpen(dropdownOpen === postId ? null : postId);
   };
 
+  const toggleComments = (postId) => {
+    setCommentsRequested((prev) => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
+    if (!commentsRequested[postId]) {
+      fetchComments(postId); // Fetch comments only when they are first requested
+    }
+  };
+
+  const fetchComments = async (postId) => {
+    try {
+      const response = await axios.get(
+        `https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/post/${postId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            apiKey: "c7b411cc-0e7c-4ad1-aa3f-822b00e7734b",
+          },
+        }
+      );
+      const commentsData = response.data.data.comments || [];
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postId]: commentsData,
+      }));
+      setCommentsRequested((prevRequested) => ({
+        ...prevRequested,
+        [postId]: true, // Mark comments as requested for this post
+      }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  // const deleteComment = async (postId, commentId) => {
+  //   const token = localStorage.getItem('token');
+  //   try {
+  //     await axios.delete(`https://photo-sharing-api-bootcamp.do.dibimbing.id/api/v1/post-comment/${commentId}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         apiKey: 'c7b411cc-0e7c-4ad1-aa3f-822b00e7734b',
+  //       },
+  //     });
+  //     // Refresh comments after deletion
+  //     fetchComments(postId);
+  //   } catch (error) {
+  //     console.error('Failed to delete comment', error);
+  //   }
+  // };
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -80,7 +133,6 @@ const MyPost = ({ id }) => {
     }
   };
 
-  // Get posts for the current page
   const paginatedPosts = posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
   if (loading) {
@@ -103,40 +155,19 @@ const MyPost = ({ id }) => {
             <div key={post.id} className="bg-white shadow-lg rounded-lg overflow-hidden relative">
               {/* Image Section */}
               <Image
-                src={post.imageUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcX9fmFcz6aeB7fkS13C5Rb4C8Yca7x0HNx9lc_8DsHsJp8BM3iWNnEhU70b3BHe4_OCM&usqp=CAU'}
+                src={post.imageUrl || "https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg" }
                 alt="Post Image"
                 className="w-full h-48 object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcX9fmFcz6aeB7fkS13C5Rb4C8Yca7x0HNx9lc_8DsHsJp8BM3iWNnEhU70b3BHe4_OCM&usqp=CAU';
-              }}
+                  e.target.src = "https://cdn1-production-images-kly.akamaized.net/J_qaSn7xpC5d-kbHx-wCsOiFsuY=/800x450/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/4770934/original/018943800_1710311605-mountains-8451480_1280.jpg"
+                }}
               />
               
-              {/* Post Content */}
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-800 truncate">{post.caption}</h2>
-                <p className="text-sm text-gray-600 my-2">{post.body}</p>
-                
-                {/* Like Button & Count */}
-                <div className="flex items-center mt-2">
-                  <button
-                    onClick={() => toggleLike(post.id, post.isLike, setPosts)}
-                    aria-label={post.isLike ? "Unlike" : "Like"}
-                  >
-                    {post.isLike ? (
-                      <HeartIconSolid className="h-6 w-6 text-red-500" />
-                    ) : (
-                      <HeartIconOutline className="h-6 w-6 text-gray-400" />
-                    )}
-                  </button>
-                  <span className="ml-2 text-gray-600 text-sm">{post.totalLikes || 0} likes</span>
-                </div>
-              </div>
-    
               {/* Post Actions (Edit/Delete) */}
               <div className="absolute top-2 right-2">
                 <button onClick={() => toggleDropdown(post.id)} aria-label="More options">
-                  <EllipsisVerticalIcon className="h-6 w-6 text-gray-500" />
+                  <EllipsisVerticalIcon className="h-6 w-6 mt-2 text-lg text-bold text-gray-500" />
                 </button>
                 {dropdownOpen === post.id && (
                   <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10">
@@ -159,26 +190,67 @@ const MyPost = ({ id }) => {
                   </div>
                 )}
               </div>
-    
-              {/* Post Date Info */}
-              <div className="px-4 pb-4">
-                <p className="text-xs text-gray-400">Created: {new Date(post.createdAt).toLocaleDateString('en-US')}</p>
-                <p className="text-xs text-gray-400">Updated: {new Date(post.updatedAt).toLocaleDateString('en-US')}</p>
-              </div>
+
+              {/* Post Content */}
+              <div className="p-4">
+                {/* Like Button & Count */}
+                <div className="flex items-center">
+                  <button
+                    onClick={() => toggleLike(post.id, post.isLike, setPosts)}
+                    aria-label={post.isLike ? "Unlike" : "Like"}
+                  >
+                    {post.isLike ? (
+                      <HeartIconSolid className="h-6 w-6 mb-2 text-red-500" />
+                    ) : (
+                      <HeartIconOutline className="h-6 w-6 mb-2 text-gray-400" />
+                    )}
+                  </button>
+                  <button onClick={() => toggleComments(post.id)}>
+                    <ChatBubbleLeftIcon className="h-6 w-6 ml-2 mb-2 text-gray-400 hover:text-gray-600" />
+                  </button>
+                  <span className="ml-2 text-gray-600 mb-2 text-sm">{post.totalLikes || 0} likes</span>
+                  <h2 className="ml-auto font-semibold mb-4 mr-2">{post.caption}</h2>
+                  </div>
+
+                {/* Timestamp */}
+                <p className="text-gray-500 text-xs mt-2">Created At: {new Date(post.createdAt).toLocaleString()}</p>
+                <p className="text-gray-500 text-xs mb-2">Updated At: {new Date(post.updatedAt).toLocaleString()}</p>
+                </div>
+
+              {/* Comment Section */}
+              {commentsRequested[post.id] && (
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  <h3 className="font-semibold text-gray-700 mb-2">comments:</h3>
+                  
+                  {/* Tampilkan komentar yang sudah ada */}
+                  {comments[post.id] && comments[post.id].map((comment) => (
+                    <div key={comment.id} className="flex justify-between items-center mb-2">
+                      <div className="flex items-center space-x-2">
+                      <p className="text-sm text-gray-600">{comment.user?.username || "Unknown User"} :</p>
+                      <p className="text-sm text-gray-600">{comment.comment}</p>
+                    </div>
+                    </div>
+                  ))}
+
+                  {/* Jika tidak ada komentar */}
+                  {(!comments[post.id] || comments[post.id].length === 0) && (
+                    <p className="text-gray-500">No comments yet.</p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
-      
-      {/* Pagination */}
+
+      {/* Pagination Controls */}
       <Pagination 
-                currentPage={currentPage} 
-                totalPages={totalPages} 
-                onPrevious={handlePreviousPage} 
-                onNext={handleNextPage} 
-            />
-</div>
-    
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+        onNext={handleNextPage} 
+        onPrevious={handlePreviousPage} 
+      />
+    </div>
   );
 };
 
