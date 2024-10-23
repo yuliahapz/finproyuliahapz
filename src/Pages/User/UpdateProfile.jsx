@@ -117,11 +117,19 @@ const UpdateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full">
-        <button onClick={() => navigate(-1)} className="bg-white-500 text-xs rounded">Back</button>
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Edit Profile</h1>
-
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate(-1)} 
+          className="mb-6 text-gray-600 hover:text-gray-800 text-sm font-medium rounded-lg flex items-center"
+        >
+          ← Back
+        </button>
+  
+        {/* Heading */}
+        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Edit Profile</h1>
+  
         {/* Display the current profile picture */}
         {previewUrl && (
           <div className="mb-4 flex justify-center">

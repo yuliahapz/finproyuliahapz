@@ -10,7 +10,6 @@ const PostById = () => {
   const { id } = useParams();
   const navigate = useNavigate(); 
   
-
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -37,21 +36,17 @@ const PostById = () => {
     setIsModalOpen(!isModalOpen); // Toggle modal visibility
   };
 
-  const handleBack = ()=> {
-    navigate(-1); // Navigate back
-  }
-
   if (isLoading) return <div className="spinner">Loading...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="flexjustify-left min-h-screen bg-gray-100 p-4">
-      <button
-        className="mb-4 bg-blue-500 hover:bg-blue-700 text-white  px-4 rounded"
-        onClick={handleBack}
-      >
-        Back
-      </button>
+    <div className="justify-left min-h-screen bg-gray-100 p-4">
+      
+      <div className="flex justify-between p-4 mb-6">
+        <button onClick={() => navigate(-1)} className="text-sm py-2 px-4 text-gray-700 cursor-pointer hover:text-gray-900 rounded ">← Back</button>
+
+      </div>
+      
       {post ? (
         <div className="flex items-center justify-center min-h-screen bg-gray-100"> {/* Menambahkan latar belakang dan pemusatan */}
         <div className="max-w-md overflow-hidden shadow-lg rounded-lg bg-white"> {/* Kartu */}

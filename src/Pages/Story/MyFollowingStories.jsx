@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import StoryById from "./StoryById";
+import StoryById from "./StoryById"; // Component to display individual story details
 
 const MyFollowingStories = () => {
     const [stories, setStories] = useState([]);

@@ -6,7 +6,6 @@ import { Image } from "antd";
 import MyFollowing from './MyFollowing';
 import MyFollowers from './MyFollowers';
 import MyPost from "../Post/MyPost";
-import Logout from "../Auth/Logout";
 
 const Profile = () => {
   const [username, setUsername] = useState("");
@@ -20,7 +19,6 @@ const Profile = () => {
   const [totalFollowers, setTotalFollowers] = useState(0);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const [id, setId] = useState(null); 
   const navigate = useNavigate();
 
@@ -73,28 +71,12 @@ const Profile = () => {
     fetchProfileData();
   }, [navigate]);
 
-  const handleCancel = () => {
-    setIsLogoutModalVisible(false);
-  };
-  
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-    setIsLogoutModalVisible(false);
-  };
-
   return (
     <div className="container mx-auto px-4">
       {/* Action Buttons */}
       <div className="flex justify-between p-4 mb-6">
-        <button onClick={() => navigate(-1)} className="bg-white text-xs py-2 px-4 rounded shadow">Back</button>
-        <button onClick={() => setIsLogoutModalVisible(true)} className="bg-white text-xs py-2 px-4 rounded shadow">Logout</button>
+        <button onClick={() => navigate(-1)} className="bg-white text-sm py-2 px-4 text-gray-600 cursor-pointer hover:text-gray-900 rounded ">← Back</button>
       </div>
-      <Logout
-        isModalVisible={isLogoutModalVisible}
-        handleCancel={handleCancel}
-        handleLogout={handleLogout}
-      />
       
       {/* Main Profile Content */}
       <div className="grid grid-cols-1 md:grid-cols-2 border-b gap-8 mb-8 pb-4">

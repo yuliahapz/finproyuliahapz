@@ -118,21 +118,14 @@ const ProfileSearch = () => {
         totalFollowing,
     } = user;
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
-    };
 
     return (
         <div className="container mx-auto px-4 md:px-8 w-full">
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-between items-center p-4 mb-6 space-y-4 sm:space-y-0">
-                <button onClick={() => navigate(-1)} className="bg-white text-xs py-2 px-4 rounded shadow">
-                    Back
-                </button>
-                <button onClick={handleLogout} className="bg-white text-xs py-2 px-4 rounded shadow">
-                    Logout
-                </button>
+            <div className="flex justify-between p-4 mb-4">
+            <button onClick={() => navigate(-1)} className="bg-white text-sm py-2 px-4 text-gray-600 cursor-pointer hover:text-gray-900 rounded ">← Back</button>
+            </div>
             </div>
 
             {/* Main Profile Content */}

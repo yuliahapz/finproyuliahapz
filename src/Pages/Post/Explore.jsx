@@ -46,7 +46,7 @@ const Explore = () => {
         fetchPosts();
     }, [currentPage]);
 
-
+    
     const fetchComments = async (postId) => {
         try {
             if (commentsRequested[postId]) {
