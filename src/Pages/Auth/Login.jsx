@@ -45,11 +45,17 @@ const Login = () => {
       toast.success('Login successful');
       setTimeout(() => { navigate('/explore') }, 200);
     } catch (error) {
-      toast.error('Invalid email or password', error);
+      if (error.response && error.response.status === 404) {
+        toast.error('Invalid Email or Password');
+      } else if (error.response && error.response.status === 500) {
+        toast.error('Internal server error');
+      } else {
+        toast.error('Login failed');
+      }
     }
   };
 
-  // Helper function to decode JWT token
+  // Helper function to decode JWT token for user ID 
 const parseJwt = (token) => {
   try {
     const base64Url = token.split('.')[1];
