@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media (max-width: 768px) {
+    .ant-layout-sider {
+      width: 80px !important;
+    }
+    .ant-layout-content {
+      margin-left: 80px !important;
+    }
+  }
+  
